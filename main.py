@@ -37,7 +37,7 @@ def chat_with_ai(message):
         }
         
         payload = {
-            "model": "meta-llama/llama-3.3-70b-instruct:free",
+            "model": "google/gemini-2.0-flash-exp:free",
             "messages": user_histories[chat_id]
         }
         
@@ -58,5 +58,5 @@ def chat_with_ai(message):
         print(f"Error: {e}")
         bot.reply_to(message, "متاسفانه مغز من فعلا یه مشکل کوچیک داره. لطفا چند لحظه دیگه دوباره تلاش کن.")
 
-print("ربات روشن شد و به مدل Llama 3.3 متصل است...")
+print("ربات روشن شد و به مدل Gemini متصل است...")
 bot.infinity_polling()
