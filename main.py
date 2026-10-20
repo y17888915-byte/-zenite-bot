@@ -2,7 +2,7 @@ import telebot
 import requests
 import os
 
-BOT_TOKEN = os.environ.get("8941757748:AAHNUHhrb4zjVDg3pGmwFuveAl337OPLaew")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 user_histories = {}
