@@ -1,7 +1,7 @@
 import telebot
 import requests
 import os
-from duckduckgo_search import DDGS
+from bs4 import BeautifulSoup
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -9,26 +9,21 @@ bot = telebot.TeleBot(BOT_TOKEN)
 user_histories = {}
 
 def search_web(query):
-    # تلاش اول: DuckDuckGo (حالت Lite)
     try:
-        results = DDGS().text(query, max_results=3, backend="lite")
-        if results:
-            return results
-    except:
-        pass
-    
-    # تلاش دوم: SearxNG (اگر داک‌داک‌گو بلاک شده بود)
-    try:
-        url = f"https://searx.be/search?q={query}&format=json"
-        headers = {"User-Agent": "Mozilla/5.0"}
+        url = f"https://www.bing.com/search?q={query}"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         response = requests.get(url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            return data.get("results", [])[:3]
-    except:
-        pass
-
-    return None
+        soup = BeautifulSoup(response.text, "html.parser")
+        results = []
+        for li in soup.select("li.b_algo"):
+            title = li.find("h2").text if li.find("h2") else ""
+            snippet = li.find("p").text if li.find("p") else ""
+            if title and snippet:
+                results.append({"title": title, "body": snippet})
+        return results[:3]
+    except Exception as e:
+        print(f"Search error: {e}")
+        return None
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -50,11 +45,9 @@ def chat_with_ai(message):
         if results:
             search_context = "\n\nاطلاعات جدید از اینترنت:\n"
             for r in results:
-                title = r.get('title', '')
-                body = r.get('body', r.get('content', ''))
-                search_context += f"- {title}: {body}\n"
+                search_context += f"- {r['title']}: {r['body']}\n"
         else:
-            search_context = "\n(نتونستم اینترنت رو چک کنم، ولی بر اساس دانش خودم جواب می‌دم)\n"
+            search_context = "\n(متاسفانه نتونستم سرچ کنم، بر اساس دانش خودم جواب می‌دم)\n"
 
     final_text = user_text + search_context
     user_histories[chat_id].append({"role": "user", "content": final_text})
