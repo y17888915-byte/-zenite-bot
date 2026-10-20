@@ -1,6 +1,6 @@
 import telebot
 import requests
-BOT_TOKEN = "8941757748:AAFFKCFnq9nkpJevtfsBcLVXV525Vz5htV04"
+BOT_TOKEN = "8941757748:AAHNUHhrb4zjVDg3pGmwFuveAl337OPLaew"
 bot = telebot.TeleBot(BOT_TOKEN)
 
 user_histories = {}
