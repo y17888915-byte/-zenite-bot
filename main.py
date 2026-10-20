@@ -8,6 +8,28 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 user_histories = {}
 
+def search_web(query):
+    # تلاش اول: DuckDuckGo (حالت Lite)
+    try:
+        results = DDGS().text(query, max_results=3, backend="lite")
+        if results:
+            return results
+    except:
+        pass
+    
+    # تلاش دوم: SearxNG (اگر داک‌داک‌گو بلاک شده بود)
+    try:
+        url = f"https://searx.be/search?q={query}&format=json"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("results", [])[:3]
+    except:
+        pass
+
+    return None
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "سلام رفیق! من زنیت هستم، دستیار و رفیق هوشمند ۲۴ ساعته تو. حالا می‌تونم توی اینترنت هم سرچ کنم! چطور می‌تونم کمکت کنم؟")
@@ -24,12 +46,14 @@ def chat_with_ai(message):
 
     search_context = ""
     if "سرچ" in user_text or "جستجو" in user_text or "اخبار" in user_text:
-        try:
-            results = DDGS().text(user_text, max_results=3)
+        results = search_web(user_text)
+        if results:
             search_context = "\n\nاطلاعات جدید از اینترنت:\n"
             for r in results:
-                search_context += f"- {r['title']}: {r['body']}\n"
-        except Exception as e:
+                title = r.get('title', '')
+                body = r.get('body', r.get('content', ''))
+                search_context += f"- {title}: {body}\n"
+        else:
             search_context = "\n(نتونستم اینترنت رو چک کنم، ولی بر اساس دانش خودم جواب می‌دم)\n"
 
     final_text = user_text + search_context
